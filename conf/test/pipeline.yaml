@@ -1,0 +1,391 @@
+---
+shared:
+  - &clone-terraform-test
+    get: terraform_test
+    resource: terraform_test
+    trigger: false
+
+  - &run
+    task: terraform ci
+    file: terraform_test/conf/test/task/run.yml
+    params: &run-params
+      ALICLOUD_ACCESS_KEY: {{alicloud_access_key}}
+      ALICLOUD_SECRET_KEY: {{alicloud_secret_key}}
+      ALICLOUD_REGION: {{alicloud_region}}
+      DING_TALK: {{ding_talk}}
+      MODULE_NAME: ""
+      ACCESS_USER_NAME:      {{access_user_name}}
+      ACCESS_PASSWORD:       {{access_password}}
+      Module_Access_Url:       {{module_access_url}}
+
+jobs:
+  - name: terraform-alicloud-remote-backend
+    plan:
+      - get: terraform-alicloud-remote-backend
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-remote-backend"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-eip-slb-ecs-rds
+    plan:
+      - get: terraform-alicloud-eip-slb-ecs-rds
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-eip-slb-ecs-rds"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-private-zone
+    plan:
+      - get: terraform-alicloud-private-zone
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-private-zone"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-slb-acl
+    plan:
+      - get: terraform-alicloud-slb-acl
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-slb-acl"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-slb-rule
+    plan:
+      - get: terraform-alicloud-slb-rule
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-slb-rule"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-vpc-ecs-eip
+    plan:
+      - get: terraform-alicloud-vpc-ecs-eip
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-vpc-ecs-eip"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-ram-fc
+    plan:
+      - get: terraform-alicloud-ram-fc
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-ram-fc"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-vpc-privatelink-connection
+    plan:
+      - get: terraform-alicloud-vpc-privatelink-connection
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-vpc-privatelink-connection"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-oss-bucket
+    plan:
+      - get: terraform-alicloud-oss-bucket
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-oss-bucket"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-ram
+    plan:
+      - get: terraform-alicloud-ram
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-ram"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-vpn-gateway
+    plan:
+      - get: terraform-alicloud-vpn-gateway
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-vpn-gateway"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-slb-listener
+    plan:
+      - get: terraform-alicloud-slb-listener
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-slb-listener"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-kms
+    plan:
+      - get: terraform-alicloud-kms
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-kms"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-ram-policy
+    plan:
+      - get: terraform-alicloud-ram-policy
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-ram-policy"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-vpc-ecs
+    plan:
+      - get: terraform-alicloud-vpc-ecs
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-vpc-ecs"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-ecs-rds
+    plan:
+      - get: terraform-alicloud-ecs-rds
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-ecs-rds"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-ram-user
+    plan:
+      - get: terraform-alicloud-ram-user
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-ram-user"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-ecs-instance
+    plan:
+      - get: terraform-alicloud-ecs-instance
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-ecs-instance"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-ecs-rds-redis
+    plan:
+      - get: terraform-alicloud-ecs-rds-redis
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-ecs-rds-redis"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-cen-instance
+    plan:
+      - get: terraform-alicloud-cen-instance
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-cen-instance"
+          terraform_version: "0.13.7"
+
+  - name: terraform-alicloud-nas
+    plan:
+      - get: terraform-alicloud-nas
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-nas"
+          terraform_version: "0.13.7"
+
+resources:
+- name: terraform_test
+  type: git
+  source:
+    uri: https://github.com/Wanghx0991/terraform_test.git
+    branch: banfen
+
+- name: terraform-alicloud-remote-backend
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-remote-backend
+    branch: master
+
+- name: terraform-alicloud-nas
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-nas
+    branch: master
+
+- name: terraform-alicloud-eip-slb-ecs-rds
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-eip-slb-ecs-rds
+    branch: master
+
+- name: terraform-alicloud-private-zone
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-private-zone
+    branch: master
+
+- name: terraform-alicloud-slb-acl
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-slb-acl
+    branch: master
+
+- name: terraform-alicloud-slb-rule
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-slb-rule
+    branch: master
+
+- name: terraform-alicloud-vpc-ecs-eip
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-vpc-ecs-eip
+    branch: master
+
+- name: terraform-alicloud-ram-fc
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-ram-fc
+    branch: master
+
+- name: terraform-alicloud-vpc-privatelink-connection
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-vpc-privatelink-connection
+    branch: master
+
+- name: terraform-alicloud-oss-bucket
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-oss-bucket
+    branch: master
+
+- name: terraform-alicloud-ram
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-ram
+    branch: master
+
+- name: terraform-alicloud-vpn-gateway
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-vpn-gateway
+    branch: master
+
+- name: terraform-alicloud-slb-listener
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-slb-listener
+    branch: master
+
+- name: terraform-alicloud-kms
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-kms
+    branch: master
+
+- name: terraform-alicloud-ram-policy
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-ram-policy
+    branch: master
+
+- name: terraform-alicloud-vpc-ecs
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-vpc-ecs
+    branch: master
+
+- name: terraform-alicloud-ecs-rds
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-ecs-rds
+    branch: master
+
+- name: terraform-alicloud-ram-user
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-ram-user
+    branch: master
+
+- name: terraform-alicloud-ecs-instance
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-ecs-instance
+    branch: master
+
+- name: terraform-alicloud-ecs-rds-redis
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-ecs-rds-redis
+    branch: master
+
+- name: terraform-alicloud-cen-instance
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-cen-instance
+    branch: master
+
+
+
+
+
+
+

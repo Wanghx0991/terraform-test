@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: golang, tag: 1.13.4}
+
+inputs:
+  - name: terraform_test
+
+
+run:
+  path: terraform_test/conf/test/task/run.sh
+params:
+  ALICLOUD_ACCESS_KEY:   ""
+  ALICLOUD_SECRET_KEY:   ""
+  ALICLOUD_REGION:       ""
+  terraform_version:     ""
+  MODULE_NAME:           ""
+  ding_talk:             ""
+  ACCESS_USER_NAME:      ""
+  ACCESS_PASSWORD:       ""
+  Module_Access_Url:     ""
