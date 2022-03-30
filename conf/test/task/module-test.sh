@@ -23,11 +23,9 @@ mkdir -p $TF_PLUGIN_CACHE_DIR
 export TF_PLUGIN_CACHE_DIR=${TF_PLUGIN_CACHE_DIR}
 
 TERRAFORM_SOURCE_PATH=$CURRENT_PATH/terraform-provider-alicloud
-TF_NEXT_PROVIDER=$CURRENT_PATH/next-provider/terraform-provider-alicloud
 
 
 echo "TERRAFORM_SOURCE_PATH = ${TERRAFORM_SOURCE_PATH}"
-echo "TF_NEXT_PROVIDER = ${TF_NEXT_PROVIDER}"
 
 
 apt-get update && apt-get install -y zip
@@ -72,7 +70,7 @@ modulePaths=$(ls -l | awk  '/^d/ {print $NF}')
 # for directName in ${modulePaths[*]};
 # do
 #   cd "${directName}"
-#   terraform init || exit
+#   terraform init -upgrade || exit
 #   terraform apply --auto-approve|| exit
 #   terraform destroy --force
 # done
@@ -83,16 +81,16 @@ if [ $Stage = "next" ];then
 echo "Stage = ${Stage}"
 ls -al
 go get golang.org/x/tools/cmd/goimports
-make devlinux
+make devlinux || exit 1
 DEBUG=terraform
 cd tmp
 modulePaths=$(ls -l | awk  '/^d/ {print $NF}')
 for directName in ${modulePaths[*]};
 do
   cd "${directName}"
-  terraform init || exit
-  terraform apply --auto-approve|| exit
-  terraform destroy --force
+  terraform init || exit 1
+  terraform apply --auto-approve|| exit 1
+  terraform destroy --force || exit 1
 done
 fi
 

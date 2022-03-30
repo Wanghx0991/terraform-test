@@ -3,15 +3,22 @@ package biz
 import (
 	"encoding/json"
 	"github.com/aliyun/terraform-test/biz/module"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"log"
 	"os"
 	"strings"
 )
 
 func init() {
-	logrus.SetReportCaller(true)
+	customFormatter := new(log.TextFormatter)
+	customFormatter.FullTimestamp = true
+	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	customFormatter.DisableTimestamp = false
+	customFormatter.DisableColors = false
+	customFormatter.ForceColors = true
+	log.SetFormatter(customFormatter)
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.DebugLevel)
 }
 
 func Run() {
@@ -26,27 +33,26 @@ func Run() {
 				Usage: "Relative Module Test",
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "relative_resources", Aliases: []string{"r"}, Required: true, Usage: "Input relative_resources"},
-					&cli.StringFlag{Name: "terraform_parameter", Aliases: []string{"p"}, Required: false, Usage: "terraform module's parameter"},
+					&cli.StringFlag{Name: "stage", Aliases: []string{"s"}, Required: false, Usage: "The Stage of terraform compatibility. valid value: [PrevStage,NextStage,NewVersion]"},
 				},
 				Action: func(c *cli.Context) error {
 					raw := strings.TrimSpace(c.String("relative_resources"))
-					logrus.Infof("The relative resources: %s", raw)
+					log.Infof("The relative resources: %s", raw)
 					resources := make([]string, 0)
 					if len(raw) != 0 {
 						resources = strings.Split(raw, ",")
 					}
-					para := c.String("terraform_parameter")
-					mod, err := module.ExecuteModules(resources, para)
+					mod, err := module.ExecuteModules(resources, c.String("stage"))
 					if err != nil {
-						logrus.Error(err)
+						log.Error(err)
 						return err
 					}
 					res, err := json.Marshal(mod)
 					if err != nil {
-						logrus.Error(err)
+						log.Error(err)
 						return err
 					}
-					logrus.Infof("%v", string(res))
+					log.Infof("%v", string(res))
 					return nil
 				},
 			},

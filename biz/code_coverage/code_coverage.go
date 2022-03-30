@@ -130,14 +130,14 @@ func (s *CodeCoverageHandler) ParseHtmlFile() ([]ResourceRes, error) {
 		if update {
 			obj.Tag = append(obj.Tag, "Align")
 		}
-
+		Tim, _ := time.Parse("2006-01-02 15:04:05", "2021-12-10 00:00:00")
 		recd := &model.TerraformTestStatistics{
 			ResourceName: obj.fileName,
 			CodeCoverage: obj.CodeCoverageRate * 10,
 			CloudProduct: obj.cloudProduct,
 			Tag:          strings.Join(obj.Tag, ","),
-			GmtCreated:   time.Now(),
-			GmtModified:  time.Now(),
+			GmtCreated:   Tim,
+			GmtModified:  Tim,
 		}
 		fmt.Printf("FileName = %s , CloudProduct = %s\n\n", recd.ResourceName, recd.CloudProduct)
 		model.NewTerraformTestStatisticsDaoInstance().CreateResourceRecord(context.Background(), nil, recd)

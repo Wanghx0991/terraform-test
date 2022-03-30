@@ -1,10 +1,12 @@
 package consts
 
 const (
-	TerrafromBaseUrl   = "https://registry.terraform.io/v1/modules"
-	TerraformUrl       = "https://registry.terraform.io"
-	MaxPageSize        = "50"
-	OssEndpointBeijing = "http://oss-cn-beijing.aliyuncs.com"
+	TerrafromBaseUrl       = "https://registry.terraform.io/v1/modules"
+	TerraformUrl           = "https://registry.terraform.io/"
+	TerraformModuleRepoUrl = "https://api.github.com/users/terraform-alicloud-modules/repos"
+	PerPage                = 10
+	ModulesNume            = 152
+	OssEndpointBeijing     = "http://oss-cn-beijing.aliyuncs.com"
 )
 
 var NameTransfer = map[string]string{

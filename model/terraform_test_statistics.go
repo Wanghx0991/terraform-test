@@ -53,7 +53,7 @@ func (d *TerraformTestStatisticsDao) CreateResourceRecord(ctx context.Context, d
 	if db.Error != nil {
 		if strings.Contains(db.Error.Error(), "Duplicate") {
 			// 重复插入
-			logrus.Warn(ctx, "CreateMemberBizOrder duplicated, rowsAffected: %d, err: %v", db.RowsAffected, db.Error)
+			logrus.Warn(ctx, "CreateResourceRecord duplicated, rowsAffected: %d, err: %v", db.RowsAffected, db.Error)
 			return -1, true, db.Error
 		}
 		logrus.Error(ctx, "CreateResourceRecord err: %v", db.Error)

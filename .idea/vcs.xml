@@ -2,5 +2,12 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/conf/test/task/terraform-alicloud-ram" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/terraform-alicloud-sae" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tmp/terraform-alicloud-private-zone" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tmp/terraform-alicloud-ram" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tmp/terraform-alicloud-rds-to-polardb" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tmp/terraform-alicloud-slb-tcp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tmp/terraform-provider-alicloud" vcs="Git" />
   </component>
 </project>

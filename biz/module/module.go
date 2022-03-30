@@ -1,6 +1,7 @@
 package module
 
 import (
+	"errors"
 	"fmt"
 	"github.com/aliyun/terraform-test/common/util"
 	"github.com/aliyun/terraform-test/consts"
@@ -8,15 +9,17 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/sirupsen/logrus"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 )
 
-var wg sync.WaitGroup
-
-//Make channels to pass fatal errors in WaitGroup
-var fatalErrors chan error
-var wgDone chan bool
+var (
+	wg sync.WaitGroup
+	//Make channels to pass fatal errors in WaitGroup
+	fatalErrors chan error
+	wgDone      chan bool
+)
 
 func init() {
 	fatalErrors = make(chan error)
@@ -41,36 +44,26 @@ type Module struct {
 	Examples        []map[string]interface{} `json:"examples"`
 }
 
-type Example struct {
-	Path      string        `json:"path"`
-	Empty     bool          `json:"empty"`
-	Inputs    []interface{} `json:"inputs"`
-	Name      string        `json:"name"`
-	Outputs   []interface{} `json:"outputs"`
-	Resources []interface{} `json:"resources"`
-}
-
-func ExecuteModules(resourceName []string, para string) (map[string]Example, error) {
-	modules, err := QueryTerraformModule(resourceName)
+func ExecuteModules(resourceName []string, stage string) (map[string][]map[string]interface{}, error) {
 	defer close(fatalErrors)
+	if stage != "PrevStage" && stage != "NextStage" && stage != "NewVersion" {
+		return nil, errors.New("please input the correct stage. the valid values: `PrevStage`, `NextStage`, `NewVersion`")
+	}
+	res, modules := make(map[string][]map[string]interface{}, 0), make(map[string]Module, 0)
+	var err error
+	// new resource && the step1 of the existed resource
+	modules, err = QueryTerraformModule(resourceName)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-	res := make(map[string]Example, 0)
+
 	for _, mod := range modules {
 		for _, raw := range mod.Examples {
 			wg.Add(1)
-			var obj Example
-			if err := mapstructure.Decode(raw, &obj); err != nil {
-				logrus.Error(err)
-				return nil, err
-			}
-			logrus.Infof("Executed Module name=%s, Examples name = %s ", mod.Name, obj.Name)
-			res[obj.Name] = obj
-			go ExecuteSingleModule(mod, obj)
+			logrus.Infof("Executed Module name=%s, Examples name = example/complete ", raw["module_name"])
+			go ExecuteSingleModule(mod, raw, stage)
 		}
-
 	}
 	// Important final goroutine to wait until WaitGroup is done
 	go func() {
@@ -96,34 +89,20 @@ func ExecuteModules(resourceName []string, para string) (map[string]Example, err
 	return res, nil
 }
 
-func ExecuteSingleModule(mod Module, obj Example) error {
+func ExecuteSingleModule(mod Module, obj map[string]interface{}, stage string) {
 	defer wg.Done()
 	t := strings.Split(mod.ID, "/")
 	name := strings.Split(mod.Source, "/")
-	moduleName := mod.Name
 	sourcePrefixName := strings.Join(t[:len(t)-1], "/")
-	folderName := strings.Join([]string{name[len(name)-1], moduleName, obj.Path}, "_")
-	content := dependency(moduleName, obj.Path, sourcePrefixName)
+	folderName := strings.Join([]string{name[len(name)-1], mod.Name, obj["path"].(string)}, "_")
+	content := dependency(mod.Name, obj["path"].(string), sourcePrefixName, stage)
 	folderName = strings.ReplaceAll(folderName, "/", "_")
 	err := processDir(folderName, content)
 	if err != nil {
 		logrus.Error(err)
-		return err
-	}
-	var out, stdErr string
-	out, stdErr, err = util.DoCmd(fmt.Sprintf("./scripts/module.sh %s", folderName))
-
-	logrus.Infof("The Source = %s, THe Modult Name = %s\n StdOut:\n %s, Error:\n%s", mod.Source, mod.Name, out, stdErr)
-	if err != nil {
 		fatalErrors <- err
-		return err
+		return
 	}
-	if strings.Contains(stdErr, "Error:") && !strings.Contains(stdErr, "Apply complete") {
-		err = fmt.Errorf(stdErr)
-		fatalErrors <- err
-		return err
-	}
-	return nil
 }
 
 func QueryTerraformModule(resourceTarget []string) (map[string]Module, error) {
@@ -132,8 +111,8 @@ func QueryTerraformModule(resourceTarget []string) (map[string]Module, error) {
 	first := true
 	client.Query = map[string]string{
 		"provider": "alicloud",
-		"limit":    consts.MaxPageSize,
 	}
+
 	var meta, resp map[string]interface{}
 	var err error
 	for {
@@ -144,18 +123,18 @@ func QueryTerraformModule(resourceTarget []string) (map[string]Module, error) {
 				logrus.Error(err)
 				return nil, err
 			}
-			if v, exist := resp["modules"]; exist {
-				m, err := querySpecifiedResources(v.([]interface{}), resourceTarget)
-				if err != nil {
-					logrus.Error()
-					return nil, err
-				}
-				err = mergo.Merge(&objects, m)
-				if err != nil {
-					logrus.Error()
-					return nil, err
-				}
-			}
+			//if v, exist := resp["modules"]; exist {
+			//	m, err := querySpecifiedResources(v.([]interface{}), resourceTarget)
+			//	if err != nil {
+			//		logrus.Error()
+			//		return nil, err
+			//	}
+			//	err = mergo.Merge(&objects, m)
+			//	if err != nil {
+			//		logrus.Error()
+			//		return nil, err
+			//	}
+			//}
 
 			meta = resp["meta"].(map[string]interface{})
 			first = false
@@ -166,12 +145,15 @@ func QueryTerraformModule(resourceTarget []string) (map[string]Module, error) {
 		if !exist {
 			break
 		}
-		client.RequestPath = consts.TerraformUrl + url.(string)
-		moduleResp, err := client.Get()
+		urlRegex := regexp.MustCompile("^https:\\/\\/\\/([a-z?&/0-9=]*)")
+		Matched := urlRegex.FindAllStringSubmatch(url.(string), -1)
+		client.RequestPath = consts.TerraformUrl + Matched[len(Matched)-1][1]
+		resp, err = client.Get()
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
+
 		if v, exist := resp["modules"]; exist {
 			m, err := querySpecifiedResources(v.([]interface{}), resourceTarget)
 			if err != nil {
@@ -185,7 +167,7 @@ func QueryTerraformModule(resourceTarget []string) (map[string]Module, error) {
 			}
 		}
 
-		meta = moduleResp["meta"].(map[string]interface{})
+		meta = resp["meta"].(map[string]interface{})
 		first = false
 	}
 	return objects, nil
@@ -193,6 +175,9 @@ func QueryTerraformModule(resourceTarget []string) (map[string]Module, error) {
 
 func querySpecifiedResources(arr []interface{}, resourceTarget []string) (map[string]Module, error) {
 	client := new(util.Client)
+	//clientGithub := github.NewClient(oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
+	//	&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+	//)))
 	objects := make(map[string]Module, 0)
 	for _, raw := range arr {
 		var mod Module
@@ -200,7 +185,7 @@ func querySpecifiedResources(arr []interface{}, resourceTarget []string) (map[st
 			logrus.Error(err)
 			return nil, err
 		}
-		if mod.Namespace == "terraform-alicloud-modules" || mod.Namespace == "aliyun" || mod.Namespace == "alibaba" {
+		if mod.Namespace == "terraform-alicloud-modules" {
 			client.RequestPath = fmt.Sprintf("%s/%s/%s/%s", consts.TerrafromBaseUrl, mod.Namespace, mod.Name, mod.Provider)
 			moduleInfo, err := client.Get()
 			if err != nil {
@@ -218,16 +203,35 @@ func querySpecifiedResources(arr []interface{}, resourceTarget []string) (map[st
 					}
 				}
 			}
-			examples := make([]map[string]interface{}, 0)
+			if !flag {
+				continue
+			}
+			var exampleTF map[string]interface{}
 			for _, example := range moduleInfo["examples"].([]interface{}) {
-				examples = append(examples, example.(map[string]interface{}))
+				if example.(map[string]interface{})["name"] == "complete" {
+					exampleTF = example.(map[string]interface{})
+				}
 			}
-			if len(examples) == 0 {
-				logrus.Warningf("The Examples is empty, module name = %s, NameSpace = %s ", mod.Name, mod.Namespace)
+
+			//_, examplesContent, _, err := clientGithub.Repositories.GetContents(context.Background(), mod.Namespace, fmt.Sprintf("terraform-alicloud-%s", mod.Name), "./examples/complete", nil)
+			if err != nil {
+				if util.IsExpectedErrors(err, []string{"Not Found"}) {
+					continue
+				}
+				return nil, errors.New(fmt.Sprintf("Query terraform-alicloud-%s error", mod.Name))
 			}
-			mod.Examples = examples
+
+			mod.Examples = append(mod.Examples, map[string]interface{}{
+				"module_name": fmt.Sprintf("terraform-alicloud-%s", mod.Name),
+				"name_space":  mod.Namespace,
+				"path":        "examples/complete",
+				"exampleTF":   exampleTF,
+			})
+
 			// 涉及到相关资源, 且examples不为空
-			if flag && len(examples) != 0 {
+			if flag && exampleTF != nil {
+				//if flag && len(examplesContent) != 0 && exampleTF != nil {
+				logrus.Infof("==== The Relative Module: terraform-alicloud-%s ====", mod.Name)
 				objects[mod.Name] = mod
 			}
 			flag = false
@@ -239,22 +243,35 @@ func querySpecifiedResources(arr []interface{}, resourceTarget []string) (map[st
 	return objects, nil
 }
 
-func dependency(moduleName, examplePath, sourcePrefixName string) string {
+func dependency(moduleName, examplePath, sourcePrefixName, stage string) string {
 	config := fmt.Sprintf(`
 module "%s"  {
 	source  = "%s//%s"
 }
 	`, moduleName, sourcePrefixName, examplePath)
+	if stage == "NextStage" || stage == "NewVersion" {
+		config += fmt.Sprint(`
+terraform {
+  required_providers {
+    alicloud = {
+      source  = "terraform.local/local/alicloud"
+      version = "1.0.0"
+    }
+  }
+}
+`)
+	}
+
 	return config
 }
 
 func processDir(dirname, content string) error {
-	err := os.MkdirAll(dirname, 0777)
+	err := os.MkdirAll("./tmp/"+dirname, 0777)
 	if err != nil {
 		logrus.Error(err)
 		return err
 	}
-	f, err := os.Create(dirname + "/main.tf")
+	f, err := os.Create("./tmp/" + dirname + "/main.tf")
 	defer f.Close()
 	if err != nil {
 		logrus.Error(err)
