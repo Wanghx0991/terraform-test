@@ -1418,6 +1418,7 @@ jobs:
           <<: *run-params
           MODULE_NAME: "terraform-alicloud-eci"
           terraform_version: "0.13.7"
+          ALICLOUD_REGION: "cn-beijing"
           Update: "false"
 
   - name: terraform-alicloud-eds
@@ -1430,6 +1431,7 @@ jobs:
           <<: *run-params
           MODULE_NAME: "terraform-alicloud-eds"
           terraform_version: "0.13.7"
+          ALICLOUD_REGION: "cn-shanghai"
           Update: "false"
 
   - name: terraform-alicloud-eventbridge
@@ -1455,6 +1457,7 @@ jobs:
           MODULE_NAME: "terraform-alicloud-global-accelerator"
           terraform_version: "0.13.7"
           Update: "false"
+          ALICLOUD_REGION: "cn-beijing"
 
   - name: terraform-alicloud-mse
     plan:
@@ -1467,6 +1470,7 @@ jobs:
           MODULE_NAME: "terraform-alicloud-mse"
           terraform_version: "0.13.7"
           Update: "false"
+          ALICLOUD_REGION: "cn-beijing"
 
   - name: terraform-alicloud-oos
     plan:
@@ -1502,6 +1506,7 @@ jobs:
           <<: *run-params
           MODULE_NAME: "terraform-alicloud-polardb-postgresql"
           terraform_version: "0.13.7"
+          ALICLOUD_REGION: "cn-beijing"
           Update: "false"
 
   - name: terraform-alicloud-serverless-workflow
@@ -1587,6 +1592,7 @@ jobs:
           MODULE_NAME: "terraform-alicloud-hbr-nas"
           terraform_version: "0.13.7"
           Update: "false"
+          USE_SLAVE: "true"
 
   - name: terraform-alicloud-service-linked-role
     plan:
@@ -1635,7 +1641,7 @@ jobs:
           <<: *run-params
           MODULE_NAME: "terraform-alicloud-ecp"
           terraform_version: "0.13.7"
-          Update: "false"
+          Update: "true"
 
   - name: terraform-alicloud-sag
     plan:
@@ -1733,12 +1739,86 @@ jobs:
           terraform_version: "0.13.7"
           Update: "true"
 
+  - name: terraform-alicloud-data-security-center
+    plan:
+      - get: terraform-alicloud-data-security-center
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-data-security-center"
+          terraform_version: "0.13.7"
+          Update: "false"
+
+  - name: terraform-alicloud-dbfs
+    plan:
+      - get: terraform-alicloud-dbfs
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-dbfs"
+          terraform_version: "0.13.7"
+          Update: "false"
+
+  - name: terraform-alicloud-imp
+    plan:
+      - get: terraform-alicloud-imp
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-imp"
+          terraform_version: "0.13.7"
+          Update: "false"
+
+  - name: terraform-alicloud-vpn-pbr-route-entry
+    plan:
+      - get: terraform-alicloud-vpn-pbr-route-entry
+        trigger: true
+      - <<: *clone-terraform-test
+      - <<: *run
+        params:
+          <<: *run-params
+          MODULE_NAME: "terraform-alicloud-vpn-pbr-route-entry"
+          terraform_version: "0.13.7"
+          Update: "false"
+
+
 resources:
 - name: terraform-test
   type: git
   source:
     uri: https://github.com/Wanghx0991/terraform-test.git
     branch: banfen
+
+- name: terraform-alicloud-vpn-pbr-route-entry
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-vpn-pbr-route-entry
+    branch: main
+
+- name: terraform-alicloud-imp
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-imp
+    branch: main
+
+
+- name: terraform-alicloud-dbfs
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-dbfs
+    branch: main
+
+- name: terraform-alicloud-data-security-center
+  type: git
+  source:
+    uri: https://github.com/terraform-alicloud-modules/terraform-alicloud-data-security-center
+    branch: main
 
 - name: terraform-alicloud-bastionhost
   type: git

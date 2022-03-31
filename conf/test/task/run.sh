@@ -55,11 +55,7 @@ echo -e  "${PINK}======Whether to Update:  ${Update}======${RES}"
 echo -e  "${PINK}======Downloading ${MODULE_NAME}======${RES}"
 rm -rf ${MODULE_NAME}
 
-if [[ $MODULE_NAME == "terraform-alicloud-sae" || $MODULE_NAME == "terraform-alicloud-enable" ]]; then
-  git clone "https://github.com/Wanghx0991/$MODULE_NAME"
-else
-  git clone "https://github.com/terraform-alicloud-modules/${MODULE_NAME}"
-fi
+git clone "https://github.com/terraform-alicloud-modules/${MODULE_NAME}"
 
 CURRENT_PATH=$(pwd)
 TERRAFORM_MODULE_PATH=$CURRENT_PATH/$MODULE_NAME
@@ -163,7 +159,8 @@ if [ $Update == "true" ]; then
 fi
 
 
-
+echo -e  "${PINK}====== Wait For The Status Sync! ======${RES}"
+sleep 15
 echo -e  "${PINK}====== Terraform Destroy! ======${RES}"
 terraform destroy -auto-approve
 if [ $? -ne 0 ]; then
