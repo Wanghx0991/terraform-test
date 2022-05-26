@@ -87,7 +87,7 @@ if [ ! -d "${TFVAR}" ] && [ Update == "true" ] ; then
 fi
 
 apt-get update && apt-get install -y zip
-wget -qN https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip
+wget -dN --no-check-certificate https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip
 unzip -o terraform_${terraform_version}_linux_amd64.zip -d /usr/bin
 
 
